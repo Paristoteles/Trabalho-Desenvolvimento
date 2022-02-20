@@ -1,135 +1,399 @@
-<?php
-// Incluir arquivo de configuração
-require_once "config.php";
- 
-// Defina variáveis e inicialize com valores vazios
-$username = $password = $confirm_password = "";
-$username_err = $password_err = $confirm_password_err = "";
- 
-// Processando dados do formulário quando o formulário é enviado
-if($_SERVER["REQUEST_METHOD"] == "POST"){
- 
-    // Validar nome de usuário
-    if(empty(trim($_POST["username"]))){
-        $username_err = "Por favor coloque um nome de usuário.";
-    } elseif(!preg_match('/^[a-zA-Z0-9_]+$/', trim($_POST["username"]))){
-        $username_err = "O nome de usuário pode conter apenas letras, números e sublinhados.";
-    } else{
-        // Prepare uma declaração selecionada
-        $sql = "SELECT id FROM users WHERE username = :username";
-        
-        if($stmt = $pdo->prepare($sql)){
-            // Vincule as variáveis à instrução preparada como parâmetros
-            $stmt->bindParam(":username", $param_username, PDO::PARAM_STR);
-            
-            // Definir parâmetros
-            $param_username = trim($_POST["username"]);
-            
-            // Tente executar a declaração preparada
-            if($stmt->execute()){
-                if($stmt->rowCount() == 1){
-                    $username_err = "Este nome de usuário já está em uso.";
-                } else{
-                    $username = trim($_POST["username"]);
-                }
-            } else{
-                echo "Ops! Algo deu errado. Por favor, tente novamente mais tarde.";
-            }
 
-            // Fechar declaração
-            unset($stmt);
-        }
-    }
-    
-    // Validar senha
-    if(empty(trim($_POST["password"]))){
-        $password_err = "Por favor insira uma senha.";     
-    } elseif(strlen(trim($_POST["password"])) < 6){
-        $password_err = "A senha deve ter pelo menos 6 caracteres.";
-    } else{
-        $password = trim($_POST["password"]);
-    }
-    
-    // Validar e confirmar a senha
-    if(empty(trim($_POST["confirm_password"]))){
-        $confirm_password_err = "Por favor, confirme a senha.";     
-    } else{
-        $confirm_password = trim($_POST["confirm_password"]);
-        if(empty($password_err) && ($password != $confirm_password)){
-            $confirm_password_err = "A senha não confere.";
-        }
-    }
-    
-    // Verifique os erros de entrada antes de inserir no banco de dados
-    if(empty($username_err) && empty($password_err) && empty($confirm_password_err)){
-        
-        // Prepare uma declaração de inserção
-        $sql = "INSERT INTO users (username, password) VALUES (:username, :password)";
-         
-        if($stmt = $pdo->prepare($sql)){
-            // Vincule as variáveis à instrução preparada como parâmetros
-            $stmt->bindParam(":username", $param_username, PDO::PARAM_STR);
-            $stmt->bindParam(":password", $param_password, PDO::PARAM_STR);
-            
-            // Definir parâmetros
-            $param_username = $username;
-            $param_password = password_hash($password, PASSWORD_DEFAULT); // Creates a password hash
-            
-            // Tente executar a declaração preparada
-            if($stmt->execute()){
-                // Redirecionar para a página de login
-                header("location: login.php");
-            } else{
-                echo "Ops! Algo deu errado. Por favor, tente novamente mais tarde.";
-            }
-
-            // Fechar declaração
-            unset($stmt);
-        }
-    }
-    
-    // Fechar conexão
-    unset($pdo);
-}
-?>
- 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-br">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="icon" href="../../../../favicon.ico">
+
+    <title>Exemplo de formulário para checkout usando Bootstrap</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+    <!-- Principal CSS do Bootstrap -->
+    <link href="../../dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Estilos customizados para esse template -->
+    <link href="form-validation.css" rel="stylesheet">
+  </head>
+
+  <body class="bg-light">
+
+    <div class="container">
+      <div class="py-5 text-center">
+        <img class="d-block mx-auto mb-4" src="../../assets/brand/bootstrap-solid.svg" alt="" width="72" height="72">
+        <h2>Formulário de checkout</h2>
+        <p class="lead">Abaixo temos um exemplo de formulário construído com controles de formulário Bootstrap. Cada campo obrigatório possui um estado de validação que é ativado quando tenta-se enviar o formulário sem completá-lo.</p>
+      </div>
+
+      <div class="row">
+        <div class="col-md-4 order-md-2 mb-4">
+          <h4 class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-muted">Seu carrinho</span>
+            <span class="badge badge-secondary badge-pill">3</span>
+          </h4>
+          <ul class="list-group mb-3">
+            <li class="list-group-item d-flex justify-content-between lh-condensed">
+              <div>
+                <h6 class="my-0">Nome do produto</h6>
+                <small class="text-muted">Breve descrição</small>
+              </div>
+              <span class="text-muted">R$12</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between lh-condensed">
+              <div>
+                <h6 class="my-0">Segundo produto</h6>
+                <small class="text-muted">Breve descrição</small>
+              </div>
+              <span class="text-muted">R$8</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between lh-condensed">
+              <div>
+                <h6 class="my-0">Terceiro item</h6>
+                <small class="text-muted">Breve descrição</small>
+              </div>
+              <span class="text-muted">R$5</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between bg-light">
+              <div class="text-success">
+                <h6 class="my-0">Código de promoção</h6>
+                <small>CODIGOEXEMEPLO</small>
+              </div>
+              <span class="text-success">-R$5</span>
+            </li>
+            <li class="list-group-item d-flex justify-content-between">
+              <span>Total (BRL)</span>
+              <strong>R$20</strong>
+            </li>
+          </ul>
+
+          <form class="card p-2">
+            <div class="input-group">
+              <input type="text" class="form-control" placeholder="Código promocional">
+              <div class="input-group-append">
+                <button type="submit" class="btn btn-secondary">Resgatar</button>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="col-md-8 order-md-1">
+          <h4 class="mb-3">Endereço de cobrança</h4>
+          <form class="needs-validation" novalidate>
+           
+
+            <div class="mb-3">
+              <label for="email">Email <span class="text-muted">(Opcional)</span></label>
+              <input type="email" class="form-control" id="email" placeholder="fulano@exemplo.com">
+              <div class="invalid-feedback">
+                Por favor, insira um endereço de e-mail válido, para atualizações de entrega.
+              </div>
+            </div>
+
+            <div class="mb-3">
+
+            <label for="cep">CEP</label>
+                <input type="text" class="form-control" id="cep" placeholder="" required>
+                <div class="invalid-feedback">
+                  É obrigatório inserir um CEP.
+                </div>
+
+
+
+
+
+
+
+              <!--<label for="endereco">Endereço</label>
+              <input type="text" class="form-control" id="endereco" placeholder="Rua dos bobos, nº 0" required>
+              <div class="invalid-feedback">
+                Por favor, insira seu endereço de entrega.
+              </div>-->
+            </div>
+
+            <div class="mb-3">
+              <label for="endereco2">Endereço 2 <span class="text-muted">(Opcional)</span></label>
+              <input type="text" class="form-control" id="endereco2" placeholder="Apartamento ou casa">
+            </div>
+
+            <div class="row">
+              <div class="col-md-5 mb-3">
+                <label for="pais">País</label>
+                <select class="custom-select d-block w-100" id="pais" required>
+                  <option value="">Escolha...</option>
+                  <option>Brasil</option>
+                </select>
+                <div class="invalid-feedback">
+                  Por favor, escolha um país válido.
+                </div>
+              </div>
+              <div class="col-md-4 mb-3">
+                <label for="estado">Estado</label>
+                <select class="custom-select d-block w-100" id="estado" required>
+                  <option value="">Escolha...</option>
+                  <option>Acre</option>
+                </select>
+                <div class="invalid-feedback">
+                  Por favor, insira um estado válido.
+                </div>
+              </div>
+              <div class="col-md-3 mb-3">
+                <label for="cep">CEP</label>
+                <input type="text" class="form-control" id="cep" placeholder="" required>
+                <div class="invalid-feedback">
+                  É obrigatório inserir um CEP.
+                </div>
+              </div>
+            </div>
+ <!--           <hr class="mb-4">
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="mesmo-endereco">
+              <label class="custom-control-label" for="mesmo-endereco">Endereço de entrega é o mesmo que o de cobrança.</label>
+            </div>
+            <div class="custom-control custom-checkbox">
+              <input type="checkbox" class="custom-control-input" id="salvar-info">
+              <label class="custom-control-label" for="salvar-info">Lembrar desta informação, na próxima vez.</label>
+            </div>-->
+            <hr class="mb-4">
+
+
+
+
+
+
+
+
+
+            <h4 class="mb-3">Pagamento</h4>
+
+            <div class="d-block my-3">
+              <div class="custom-control custom-radio">
+                <input id="credito" name="paymentMethod" type="radio" class="custom-control-input" checked required>
+                <label class="custom-control-label" for="credito">Cartão de crédito</label>
+              </div>
+              <div class="custom-control custom-radio">
+                <input id="debito" name="paymentMethod" type="radio" class="custom-control-input" required>
+                <label class="custom-control-label" for="debito">Cartão de débito</label>
+              </div>
+              <div class="custom-control custom-radio">
+                <input id="paypal" name="paymentMethod" type="radio" class="custom-control-input" required>
+                <label class="custom-control-label" for="paypal">PayPal</label>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label for="cc-nome">Nome no cartão</label>
+                <input type="text" class="form-control" id="cc-nome" placeholder="" required>
+                <small class="text-muted">Nome completo, como mostrado no cartão.</small>
+                <div class="invalid-feedback">
+                  O nome que está no cartão é obrigatório.
+                </div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <label for="cc-numero">Número do cartão de crédito</label>
+                <input type="text" class="form-control" id="cc-numero" placeholder="" required>
+                <div class="invalid-feedback">
+                  O número do cartão de crédito é obrigatório.
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-3 mb-3">
+                <label for="cc-expiracao">Data de expiração</label>
+                <input type="text" class="form-control" id="cc-expiracao" placeholder="" required>
+                <div class="invalid-feedback">
+                  Data de expiração é obrigatória.
+                </div>
+              </div>
+              <div class="col-md-3 mb-3">
+                <label for="cc-cvv">CVV</label>
+                <input type="text" class="form-control" id="cc-cvv" placeholder="" required>
+                <div class="invalid-feedback">
+                  Código de segurança é obrigatório.
+                </div>
+              </div>
+            </div>
+            <hr class="mb-4">
+            <button class="btn btn-primary btn-lg btn-block" type="submit">Continue o checkout</button>
+          </form>
+        </div>
+      </div>
+
+      <footer class="my-5 pt-5 text-muted text-center text-small">
+        <p class="mb-1">&copy; 2017-2018 Nome da companhia</p>
+        <ul class="list-inline">
+          <li class="list-inline-item"><a href="#">Privacidade</a></li>
+          <li class="list-inline-item"><a href="#">Termos</a></li>
+          <li class="list-inline-item"><a href="#">Suporte</a></li>
+        </ul>
+      </footer>
+    </div>
+
+    <!-- Principal JavaScript do Bootstrap
+    ================================================== -->
+    <!-- Foi colocado no final para a página carregar mais rápido -->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+    <script src="../../assets/js/vendor/popper.min.js"></script>
+    <script src="../../dist/js/bootstrap.min.js"></script>
+    <script src="../../assets/js/vendor/holder.min.js"></script>
+    <script>
+      // Exemplo de JavaScript para desativar o envio do formulário, se tiver algum campo inválido.
+      (function() {
+        'use strict';
+
+        window.addEventListener('load', function() {
+          // Selecione todos os campos que nós queremos aplicar estilos Bootstrap de validação customizados.
+          var forms = document.getElementsByClassName('needs-validation');
+
+          // Faz um loop neles e previne envio
+          var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+              if (form.checkValidity() === false) {
+                event.preventDefault();
+                event.stopPropagation();
+              }
+              form.classList.add('was-validated');
+            }, false);
+          });
+        }, false);
+      })();
+    </script>
+  </body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<?php session_start() ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DID/xhtmll-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+
 <head>
-    <meta charset="UTF-8">
-    <title>Cadastro</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
-    <style>
-        body{ font: 14px sans-serif; }
-        .wrapper{ width: 360px; padding: 20px; }
-    </style>
+    <meta http-equiv="Content-Type" content="text/html; charset-utf-8" />
+    <title>Technolosell</title>
 </head>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+<style>
+    .redesocial {
+        height: 40px;
+        width: 40px;
+    }
+</style>
+<?php
+include_once("config.php");
+?>
+
 <body>
-    <div class="wrapper">
-        <h2>Cadastro</h2>
-        <p>Por favor, preencha este formulário para criar uma conta.</p>
-        <form action="<?php echo htmlspecialchars($_SERVER["PHP_SELF"]); ?>" method="post">
-            <div class="form-group">
-                <label>Nome do usuário</label>
-                <input type="text" name="username" class="form-control <?php echo (!empty($username_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $username; ?>">
-                <span class="invalid-feedback"><?php echo $username_err; ?></span>
-            </div>    
-            <div class="form-group">
-                <label>Senha</label>
-                <input type="password" name="password" class="form-control <?php echo (!empty($password_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $password; ?>">
-                <span class="invalid-feedback"><?php echo $password_err; ?></span>
+    <!--CABEÇALHO-->
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" aria-current="page" href="inicio.php">Technolosell</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+                <div class="navbar-nav">
+                    <a class="nav-link" href="monitores.php">Monitores</a>
+                    <a class="nav-link" href="mouses.php">Mouses</a>
+                    <a class="nav-link" href="teclados.php">Teclados</a>
+                    <a class="nav-link" href="usuario.php">Perfil</a>
+                    <a class="nav-link" href="cadastrar.php">Cadastrar Produto</a>
+                </div>
             </div>
-            <div class="form-group">
-                <label>Confirme a senha</label>
-                <input type="password" name="confirm_password" class="form-control <?php echo (!empty($confirm_password_err)) ? 'is-invalid' : ''; ?>" value="<?php echo $confirm_password; ?>">
-                <span class="invalid-feedback"><?php echo $confirm_password_err; ?></span>
+        </div>
+    </nav>
+
+   
+
+    <section class="vh-100" style="background-color: lightgray">
+        <div class="container h-100">
+            <div class="row d-flex justify-content-center align-items-center h-100">
+                <div class="col">
+                <h1>Carrinho</h1>
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+
+
+
+                            
+                            <table  class="table table-hover" width="700">
+                                <thead>
+                                    <td>Produto</td>
+                                    <td>Valor</td>
+                                    <td>Descrição</td>
+                                </thead>
+                                <?php
+                                if (isset($_SESSION['venda'])) {
+                                } else {
+                                    $_SESSION['venda'] = array();
+                                }
+                                if (isset($_POST['par'])) {
+                                    $prod = $_POST['par'];
+                                    $_SESSION['venda'][$prod] = 1;
+                                }
+                                if (isset($_POST['del'])){
+                                    $del = $_POST['del'];
+                                    unset($_SESSION['venda'][$del]);
+                                }
+
+
+
+
+                                ?>
+                                </br>
+                                <?php
+
+                                foreach ($_SESSION['venda'] as $Prod => $Quantidade) {
+                                    $select = $pdo->prepare("SELECT * FROM produtos WHERE idprodutos =:id");
+                                    $select->execute(["id" => $Prod]);
+                                    $fetch = $select->fetchAll();
+                                    echo '<tr>';
+                                    echo '<td>' . $fetch[0]['nome'] . '</td>';
+                                    echo '<td>' . $fetch[0]['preco'] . '</td>';
+                                    echo '<td>' . $fetch[0]['descricao'] . '</td>';
+                                    echo '</tr>';
+                                }
+                                ?>
+                                  
+                               
+                            </table>
+                            <td><a href="deletar.php" class="btn btn-dark">Sair da conta</a></td>
+                        </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            <div class="form-group">
-                <input type="submit" class="btn btn-primary" value="Criar Conta">
-                <input type="reset" class="btn btn-secondary ml-2" value="Apagar Dados">
-            </div>
-            <p>Já tem uma conta? <a href="login.php">Entre aqui</a>.</p>
-        </form>
-    </div>    
+    </section>
+
+    <!-- RODAPÉ -->
+
+    <nav class="navbar fixed-bottom navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Technolosell</a>
+            <a class="navbar-brand" href="https://hospedario.com.br/wp-content/uploads/2020/07/Quanto-Ganha-o-Xaropinho.jpg"><img src="imagensredesocial/facebook.png" class="redesocial"></a>
+            <a class="navbar-brand" href="https://hospedario.com.br/wp-content/uploads/2020/07/Quanto-Ganha-o-Xaropinho.jpg"><img src="imagensredesocial/instagram.png" class="redesocial"></a>
+            <a class="navbar-brand" href="https://hospedario.com.br/wp-content/uploads/2020/07/Quanto-Ganha-o-Xaropinho.jpg"><img src="imagensredesocial/twitter.png" class="redesocial"></a>
+            <a class="navbar-brand" href="#">© 2021 Technolosell, Inc</a>
+        </div>
+    </nav>
+
+    <!-- Option 1: Bootstrap Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
+
 </body>
+
 </html>

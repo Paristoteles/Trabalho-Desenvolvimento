@@ -11,6 +11,15 @@
 
     <title>Technolosell</title>
 
+    <style>
+        .redesocial {
+            height: 40px;
+            width: 40px;
+        }
+        .card-title{
+            text-align: center;
+        }
+    </style>
 
 </head>
 
@@ -34,70 +43,42 @@
                 </div>
             </div>
         </div>
-</nav>
+    </nav>
 
 
-<?php
+    <?php
 
-//iniciando a conexão com o banco de dados 
-include_once("config2.php");
-if (!$conn) {
- die('Não foi possível conectar ao Banco de Dados');
-}
-$conexao= mysqli_connect("localhost", "root", "", "jesuscristo");
-$sql = mysqli_query($conn, "SELECT * FROM produtos WHERE categoria = 'm' ORDER BY idprodutos DESC");
-//$sql = mysqli_query("SELECT * FROM produtos ORDER BY id DESC");
-?>
-<div class='row'>
-<?php
+    require_once("config.php");
+    require("listar.php");
+    //$conexaocarrinho = new PDO ('mysql:host=localhost;dbname="produtos',"root","");
 
+    $select = $pdo->prepare("SELECT * FROM produtos WHERE categoria = 'm' ORDER BY idprodutos DESC");
+    $select->execute();
+    $fetch = $select->fetchAll();
+    ?>
+    <div class='row'>
+        <?php
 
-while($user_data = mysqli_fetch_assoc($sql)){
-    echo "<div class='col-3 mb-3 d-flex align-items-stretch'>";
-    echo "<div class='card'>";
-    echo "<img src=''".$user_data['imagem']." class='card-img-top'/>";
-    echo "<div class='card-body'>";
-    echo " <h6 class='card-title'>".$user_data['nome']."</h6>";
-    echo " <h6 class='card-title'>".$user_data['preco']."</h6>";
-    echo " <h6 class='card-title'>".$user_data['descricao']."</h6>";
+        foreach ($fetch as $produto) {
+        ?>
+            <div class="row" style="width: 18rem;">
 
-    echo "<a href='carrinho.php' class='btn btn-sm btn-secondary'>Adicionar Item</a>";
-    echo "</div>";
-    echo "</div>";
-    echo "</div>";
+                <img src="<?php echo $produto['arquivo'] ?>" class="card-img-top" height="200px">
 
-}
+                <div class="card-body">
+                    <h5 class="card-title"><?php echo $produto['nome'] ?></h5>
+                    <P class="card-title">R$ <?php echo $produto['preco'] ?></h5>
+                    <p class="card-text"><?php echo $produto['descricao'] ?></p>
+                    <a class="btn btn-dark" href="carrinho.php?par=<?php echo $produto['idprodutos'] ?>">ADICIONAR AO CARRINHO</a>
+                </div>
+            </div>
 
+        <?php
+        }
+        ?>
+    </div>
 
-?>
-
-
-
-
-
-
-
-
- </div>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<nav class="navbar fixed-bottom navbar-dark bg-dark">
+    <nav class="navbar fixed-bottom navbar-dark bg-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">Technolosell</a>
             <a class="navbar-brand" href="https://hospedario.com.br/wp-content/uploads/2020/07/Quanto-Ganha-o-Xaropinho.jpg"><img src="imagensredesocial/facebook.png" class="redesocial"></a>
@@ -111,30 +92,5 @@ while($user_data = mysqli_fetch_assoc($sql)){
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
 
 </body>
+
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

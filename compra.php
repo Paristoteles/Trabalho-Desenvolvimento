@@ -12,16 +12,6 @@
     <title>Technolosell</title>
 
     <style>
-        body {
-            background-color: lightgray;
-        }
-
-        .btn-login {
-            font-size: 0.9rem;
-            letter-spacing: 0.05rem;
-            padding: 0.75rem 1rem;
-        }
-
         .redesocial {
             height: 40px;
             width: 40px;
@@ -53,54 +43,42 @@
     </nav>
 
 
-    <div class="container">
-        <div class="row">
-            <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
-                <div class="card border-0 shadow rounded-3 my-5">
-                    <div class="card-body p-4 p-sm-5">
-                        <h5 class="card-title text-center mb-5 fw-light fs-5">Cadastrar Produto</h5>
-
-                        <?php
-                        session_start();
-                        require_once("config2.php");
-
-                        if (!empty($_SESSION['mensagem'])) {
-                            echo '<div class="alert alert-success">' . $_SESSION['mensagem'] . '</div>';
-                            unset($_SESSION['mensagem']);
-                        }
-                        ?>
-
-                        <form action="listar.php" enctype="multipart/form-data" method="post" accept-charset="utf-8">
-                            <label class="text-center mb-1 fw-light fs-5">Selecione a categoria</label>
-                            <select class="form-control" name="categoria" required>
-                                <option disabled selected></option>
-                                <option value="a">Monitor</option>
-                                <option value="m">Mouse</option>
-                                <option value="t">Teclado</option>
-                            </select></br>
-                            <input type="text" class="form-control" name="nomeproduto" placeholder="Nome do Produto"></br>
-                            <input type="number" class="form-control" name="preco" placeholder="Preço" required></br>
-                            <input type="text" class="form-control" name="descricao" placeholder="Descrição" required></br></br>
-
-                            <div class="card">
-                                <div class="card-body">
-                                    <input type="file" name="arquivo">
-                                </div>
-                            </div>
-
-                            <input type="submit" class="w-100 btn btn-lg btn-dark" name="enviar">
-
-
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 
 
 
-    <nav class="navbar fixed-bottom navbar-dark bg-dark">
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<nav class="navbar fixed-bottom navbar-dark bg-dark">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">Technolosell</a>
             <a class="navbar-brand" href="https://hospedario.com.br/wp-content/uploads/2020/07/Quanto-Ganha-o-Xaropinho.jpg"><img src="imagensredesocial/facebook.png" class="redesocial"></a>
